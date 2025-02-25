@@ -6,157 +6,62 @@ using System.Threading.Tasks;
 
 namespace paterns
 {
-    public class Pizza
+    public interface ICar
     {
-        public string Testo { get; set; }
-        public string Sauce { get; set; }
-        public List<string> Toppings { get; set; } = new List<string>();
+        ICar Clone();
+        void ShowDetails();
+    }
 
-        public override string ToString()
+    public class Car : ICar
+    {
+        public string Model { get; set; }
+        public string Engine { get; set; }
+        public string Color { get; set; }
+        public Car(string model, string engine, string color)
         {
-            return $"Пицца с {Testo} тістом и {Sauce} соусом.\nТоппинги: {string.Join(", ", Toppings)}";
+            Model = model;
+            Engine = engine;
+            Color = color;
+        }
+        public ICar Clone()
+        {
+            return new Car(Model, Engine, Color);
+        }
+        public void ShowDetails()
+        {
+            Console.WriteLine($"Model: {Model}, Engine: {Engine}, Color: {Color}");
+        }
+
+    }
+    public class CarFactory
+    {
+        private Dictionary<string, ICar> _carPrototypes = new Dictionary<string, ICar>();
+
+        public void RegisterCar(string key, ICar car)
+        {
+            _carPrototypes[key] = car;
+        }
+
+        public ICar CreateCar(string key)
+        {
+            return _carPrototypes.ContainsKey(key) ? _carPrototypes[key].Clone() : null;
         }
     }
-    public abstract class PizzaBuilder
+    class Program
     {
-        protected Pizza pizza;
-
-        public PizzaBuilder()
+        static void Main(string[] args)
         {
-            Reset();
-        }
-
-        public void Reset()
-        {
-            pizza = new Pizza();
-        }
-
-        public abstract PizzaBuilder BuildTesto();
-        public abstract PizzaBuilder BuildSauce();
-        public abstract PizzaBuilder BuildToppings();
-
-        public Pizza GetPizza()
-        {
-            Pizza result = pizza;
-            Reset();
-            return result;
-        }
-
-        public class MargheritaPizza : PizzaBuilder
-        {
-            public override PizzaBuilder BuildTesto()
-            {
-                pizza.Testo = "тонким";
-                return this;
-            }
-
-            public override PizzaBuilder BuildSauce()
-            {
-                pizza.Sauce = "томатний";
-                return this;
-            }
-
-            public override PizzaBuilder BuildToppings()
-            {
-                pizza.Toppings.Add("моцарелла");
-                pizza.Toppings.Add("базилик");
-                pizza.Toppings.Add("оливкове масло");
-                return this;
-            }
-        }
-        public class PepperoniPizza : PizzaBuilder
-        {
-            public override PizzaBuilder BuildTesto()
-            {
-                pizza.Testo = "традиційним";
-                return this;
-            }
-
-            public override PizzaBuilder BuildSauce()
-            {
-                pizza.Sauce = "томатним";
-                return this;
-            }
-
-            public override PizzaBuilder BuildToppings()
-            {
-                pizza.Toppings.Add("моцарелла");
-                pizza.Toppings.Add("пепперони");
-                return this;
-            }
-        }
-        public class QuattroFormaggiPizza : PizzaBuilder
-        {
-            public override PizzaBuilder BuildTesto()
-            {
-                pizza.Testo = "тонким";
-                return this;
-            }
-
-            public override PizzaBuilder BuildSauce()
-            {
-                pizza.Sauce = "барбекю";
-                return this;
-            }
-
-            public override PizzaBuilder BuildToppings()
-            {
-                pizza.Toppings.Add("моцарелла");
-                pizza.Toppings.Add("пармезан");
-                pizza.Toppings.Add("рикотта");
-                pizza.Toppings.Add("чедер");
-                return this;
-            }
-        }
-        public class Pizzeria
-        {
-            private PizzaBuilder builder;
-
-            public void SetBuilder(PizzaBuilder builder)
-            {
-                this.builder = builder;
-            }
-
-            public Pizza MakePizza()
-            {
-                return builder
-                    .BuildTesto()
-                    .BuildSauce()
-                    .BuildToppings()
-                    .GetPizza();
-            }
-        }
-
-        public class Program
-        {
-            public static void Main()
-            {
-                Pizzeria pizzeria = new Pizzeria();
-                PizzaBuilder margheritaBuilder = new MargheritaPizza();
-                PizzaBuilder pepperoniBuilder = new PepperoniPizza();
-                PizzaBuilder quattroFormaggiBuilder = new QuattroFormaggiPizza();
-                pizzeria.SetBuilder(margheritaBuilder);
-                Pizza margherita = pizzeria.MakePizza();
-                Console.WriteLine("Заказ 1:");
-                Console.WriteLine(margherita);
-                Console.WriteLine();
-                pizzeria.SetBuilder(pepperoniBuilder);
-                Pizza pepperoni = pizzeria.MakePizza();
-                Console.WriteLine("Заказ 2:");
-                Console.WriteLine(pepperoni);
-                Console.WriteLine();
-                pizzeria.SetBuilder(quattroFormaggiBuilder);
-                Pizza quattroFormaggi = pizzeria.MakePizza();
-                Console.WriteLine("Заказ 3:");
-                Console.WriteLine(quattroFormaggi);
-                Console.WriteLine("\nПриклад індивідуального заказу:");
-                Pizza customPizza = new PepperoniPizza()
-                    .BuildTesto()
-                    .BuildSauce()
-                    .BuildToppings()
-                    .GetPizza();
-                Console.WriteLine(customPizza);
-            }
+            CarFactory factory = new CarFactory();
+            factory.RegisterCar("Sedan", new Car("Sedan", "V6", "Red"));
+            factory.RegisterCar("SUV", new Car("SUV", "V8", "Blue"));
+            ICar sedan = factory.CreateCar("Sedan");
+            ICar suv = factory.CreateCar("SUV");
+            sedan.ShowDetails();
+            suv.ShowDetails();
+            ICar clonedSedan = factory.CreateCar("Sedan");
+            ICar clonedSUV = factory.CreateCar("SUV");
+            clonedSedan.ShowDetails();
+            clonedSUV.ShowDetails();
         }
     }
 }
