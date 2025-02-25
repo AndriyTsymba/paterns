@@ -6,125 +6,216 @@ using System.Threading.Tasks;
 
 namespace paterns
 {
-    public enum Difficulty
-    {
-        Easy,
-        Normal,
-        Hard
-    }
-    public abstract class Enemy
-    {
-        public int Health { get; protected set; }
-        public int Damage { get; protected set; }
 
-        public virtual void Attack()
+    public interface Chair
+    {
+        string GetDescription();
+        void SitOn();
+    }
+
+    public interface Sofa
+    {
+        string GetDescription();
+        void LieOn();
+    }
+
+    public interface CoffeeTable
+    {
+        string GetDescription();
+        void PlaceItem(string item);
+    }
+    public interface FurnitureFactory
+    {
+        Chair CreateChair();
+        Sofa CreateSofa();
+        CoffeeTable CreateCoffeeTable();
+        string GetStyleName();
+    }
+    public class ModernChair : Chair
+    {
+        public string GetDescription()
         {
-            Console.WriteLine($"{GetType().Name} attacks for {Damage} damage!");
+            return "Modern Chair: Minimalist design with metal frame and clean lines";
         }
-        public virtual void DisplayInfo()
+
+        public void SitOn()
         {
-            Console.WriteLine($"{GetType().Name} - Health: {Health}, Damage: {Damage}");
+            Console.WriteLine("Sitting on a sleek and comfortable modern chair");
         }
     }
-    public class Zombie : Enemy
+    public class ModernSofa : Sofa
     {
-        public Zombie(Difficulty difficulty)
+        public string GetDescription()
         {
-            switch (difficulty)
+            return "Modern Sofa: Low-profile with straight lines and neutral colors";
+        }
+
+        public void LieOn()
+        {
+            Console.WriteLine("Lounging on a spacious modern sofa");
+        }
+    }
+    public class ModernCoffeeTable : CoffeeTable
+    {
+        public string GetDescription()
+        {
+            return "Modern Coffee Table: Glass top with geometric metal base";
+        }
+
+        public void PlaceItem(string item)
+        {
+            Console.WriteLine($"Placing {item} on the glass modern coffee table");
+        }
+    }
+    public class VictorianChair : Chair
+    {
+        public string GetDescription()
+        {
+            return "Victorian Chair: Ornate wooden frame with tufted velvet upholstery";
+        }
+
+        public void SitOn()
+        {
+            Console.WriteLine("Sitting on an elegant Victorian chair with proper posture");
+        }
+    }
+
+    public class VictorianSofa : Sofa
+    {
+        public string GetDescription()
+        {
+            return "Victorian Sofa: Carved wood details with plush floral fabric";
+        }
+
+        public void LieOn()
+        {
+            Console.WriteLine("Gracefully reclining on a Victorian sofa");
+        }
+    }
+
+    public class VictorianCoffeeTable : CoffeeTable
+    {
+        public string GetDescription()
+        {
+            return "Victorian Coffee Table: Dark mahogany with intricate carved details";
+        }
+
+        public void PlaceItem(string item)
+        {
+            Console.WriteLine($"Carefully placing {item} on the polished Victorian coffee table");
+        }
+    }
+    public class ModernFactory : FurnitureFactory
+    {
+        public Chair CreateChair()
+        {
+            return new ModernChair();
+        }
+
+        public Sofa CreateSofa()
+        {
+            return new ModernSofa();
+        }
+
+        public CoffeeTable CreateCoffeeTable()
+        {
+            return new ModernCoffeeTable();
+        }
+
+        public string GetStyleName()
+        {
+            return "Modern";
+        }
+    }
+    public class VictorianFurnitureFactory : FurnitureFactory
+    {
+        public Chair CreateChair()
+        {
+            return new VictorianChair();
+        }
+
+        public Sofa CreateSofa()
+        {
+            return new VictorianSofa();
+        }
+
+        public CoffeeTable CreateCoffeeTable()
+        {
+            return new VictorianCoffeeTable();
+        }
+
+        public string GetStyleName()
+        {
+            return "Victorian";
+        }
+    }
+    public class FurnitureShop
+    {
+        private readonly FurnitureFactory _factory;
+
+        public FurnitureShop(FurnitureFactory factory)
+        {
+            _factory = factory;
+        }
+        public void DisplayFurnitureSet()
+        {
+            Console.WriteLine($"\n=== {_factory.GetStyleName()} Furniture Set ===");
+
+            Chair chair = _factory.CreateChair();
+            Sofa sofa = _factory.CreateSofa();
+            CoffeeTable coffeeTable = _factory.CreateCoffeeTable();
+
+            Console.WriteLine(chair.GetDescription());
+            Console.WriteLine(sofa.GetDescription());
+            Console.WriteLine(coffeeTable.GetDescription());
+        }
+        public void DemonstrateUsage()
+        {
+            Console.WriteLine($"\n=== Using {_factory.GetStyleName()} Furniture ===");
+
+            Chair chair = _factory.CreateChair();
+            Sofa sofa = _factory.CreateSofa();
+            CoffeeTable coffeeTable = _factory.CreateCoffeeTable();
+
+            chair.SitOn();
+            sofa.LieOn();
+            coffeeTable.PlaceItem("coffee cup");
+        }
+        public Dictionary<string, object> OrderFurnitureSet(int quantity = 1)
+        {
+            var order = new Dictionary<string, object>();
+
+            for (int i = 0; i < quantity; i++)
             {
-                case Difficulty.Easy:
-                    Health = 100;
-                    Damage = 10;
-                    break;
-                case Difficulty.Normal:
-                    Health = 150;
-                    Damage = 15;
-                    break;
-                case Difficulty.Hard:
-                    Health = 250;
-                    Damage = 25;
-                    break;
+                order[$"Chair_{i}"] = _factory.CreateChair();
+                order[$"Sofa_{i}"] = _factory.CreateSofa();
+                order[$"CoffeeTable_{i}"] = _factory.CreateCoffeeTable();
             }
-        }
-        public override void Attack()
-        {
-            Console.WriteLine($"Zombie slowly approaches and bites for {Damage} damage!");
-        }
-    }
-    public class Skeleton : Enemy
-    {
-        public Skeleton(Difficulty difficulty)
-        {
-            switch (difficulty)
-            {
-                case Difficulty.Easy:
-                    Health = 80;
-                    Damage = 15;
-                    break;
-                case Difficulty.Normal:
-                    Health = 120;
-                    Damage = 20;
-                    break;
-                case Difficulty.Hard:
-                    Health = 180;
-                    Damage = 30;
-                    break;
-            }
-        }
 
-        public override void Attack()
-        {
-            Console.WriteLine($"Skeleton shoots an arrow for {Damage} damage!");
+            Console.WriteLine($"Ordered {quantity} sets of {_factory.GetStyleName()} furniture");
+            return order;
         }
     }
-    public abstract class EnemyFactory
-    {
-        public abstract Enemy CreateEnemy(Difficulty difficulty);
-    }
-    public class ZombieFactory : EnemyFactory
-    {
-        public override Enemy CreateEnemy(Difficulty difficulty)
-        {
-            return new Zombie(difficulty);
-        }
-    }
-
-    public class SkeletonFactory : EnemyFactory
-    {
-        public override Enemy CreateEnemy(Difficulty difficulty)
-        {
-            return new Skeleton(difficulty);
-        }
-    }
-    public class Game
+    public class Program
     {
         public static void Main()
         {
-            EnemyFactory zombieFactory = new ZombieFactory();
-            EnemyFactory skeletonFactory = new SkeletonFactory();
-            Console.WriteLine("Easy Difficulty Enemies:");
-            Enemy easyZombie = zombieFactory.CreateEnemy(Difficulty.Easy);
-            Enemy easySkeleton = skeletonFactory.CreateEnemy(Difficulty.Easy);
-            easyZombie.DisplayInfo();
-            easySkeleton.DisplayInfo();
-            Console.WriteLine("\nNormal Difficulty Enemies:");
-            Enemy normalZombie = zombieFactory.CreateEnemy(Difficulty.Normal);
-            Enemy normalSkeleton = skeletonFactory.CreateEnemy(Difficulty.Normal);
-            normalZombie.DisplayInfo();
-            normalSkeleton.DisplayInfo();
-            Console.WriteLine("\nHard Difficulty Enemies:");
-            Enemy hardZombie = zombieFactory.CreateEnemy(Difficulty.Hard);
-            Enemy hardSkeleton = skeletonFactory.CreateEnemy(Difficulty.Hard);
-            hardZombie.DisplayInfo();
-            hardSkeleton.DisplayInfo();
-            Console.WriteLine("\nEnemy Attacks:");
-            easyZombie.Attack();
-            normalSkeleton.Attack();
-            hardZombie.Attack();
-            Console.WriteLine("\nAdding a new enemy type would be simple:");
-            Console.WriteLine("1. Create a new Ghost class inheriting from Enemy");
-            Console.WriteLine("2. Create a new GhostFactory inheriting from EnemyFactory");
-            Console.WriteLine("3. Use the factory to create instances as needed");
+            Console.WriteLine("=== Furniture Shop Abstract Factory Demo ===");
+            FurnitureFactory modernFactory = new ModernFactory();
+            FurnitureShop modernShop = new FurnitureShop(modernFactory);
+            modernShop.DisplayFurnitureSet();
+            modernShop.DemonstrateUsage();
+            modernShop.OrderFurnitureSet(2);
+            FurnitureFactory victorianFactory = new VictorianFurnitureFactory();
+            FurnitureShop victorianShop = new FurnitureShop(victorianFactory);
+            victorianShop.DisplayFurnitureSet();
+            victorianShop.DemonstrateUsage();
+            victorianShop.OrderFurnitureSet();
+            Console.WriteLine("\n=== How to extend with a new style ===");
+            Console.WriteLine("1. Create concrete implementations of IChair, ISofa, ICoffeeTable for the new style");
+            Console.WriteLine("2. Implement a new factory class that implements IFurnitureFactory");
+            Console.WriteLine("3. Create a shop instance with the new factory");
+            Console.WriteLine("Example: FurnitureShop scandinavianShop = new FurnitureShop(new ScandinavianFurnitureFactory());");
         }
     }
 }
