@@ -6,78 +6,51 @@ using System.Threading.Tasks;
 
 namespace paterns
 {
-    namespace FacadePattern
+    public interface ICar
     {
-        public class Amplifier
+        void Display(string color);
+    }
+    public class Car : ICar
+    {
+        private string model;
+        public Car(string model)
         {
-            public void On() => Console.WriteLine("Amplifier is on.");
-            public void Off() => Console.WriteLine("Amplifier is off.");
-            public void SetVolume(int level) => Console.WriteLine($"Setting volume to {level}");
+            this.model = model;
         }
-        public class Projector
+        public void Display(string color)
         {
-            public void On() => Console.WriteLine("Projector is on.");
-            public void Off() => Console.WriteLine("Projector is off.");
-            public void SetInput(string input) => Console.WriteLine($"Setting input to {input}");
+            Console.WriteLine($"Car model: {model}, Color: {color}");
         }
-        public class Screen
+    }
+    public class CarFactory
+    {
+        private Dictionary<string, ICar> cars = new Dictionary<string, ICar>();
+        public ICar GetCar(string model)
         {
-            public void Down() => Console.WriteLine("Screen is down.");
-            public void Up() => Console.WriteLine("Screen is up.");
+            if (!cars.ContainsKey(model))
+            {
+                cars[model] = new Car(model);
+                Console.WriteLine($"Creating car model: {model}");
+            }
+            return cars[model];
         }
-        public class DVDPlayer
+    }
+    class Program
+    {
+        static void Main()
         {
-            public void On() => Console.WriteLine("DVD player is on.");
-            public void Off() => Console.WriteLine("DVD player is off.");
-            public void Play(string movie) => Console.WriteLine($"Playing movie: {movie}");
-        }
-        public class HomeTheaterFacade
-        {
-            private Amplifier _amplifier;
-            private Projector _projector;
-            private Screen _screen;
-            private DVDPlayer _dvdPlayer;
+            CarFactory carFactory = new CarFactory();
+            ICar car1 = carFactory.GetCar("BMW");
+            car1.Display("Red");
 
-            public HomeTheaterFacade(Amplifier amplifier, Projector projector, Screen screen, DVDPlayer dvdPlayer)
-            {
-                _amplifier = amplifier;
-                _projector = projector;
-                _screen = screen;
-                _dvdPlayer = dvdPlayer;
-            }
+            ICar car2 = carFactory.GetCar("BMW");
+            car2.Display("Blue");
 
-            public void WatchMovie(string movie)
-            {
-                Console.WriteLine("\nGet ready to watch a movie...");
-                _screen.Down();
-                _projector.On();
-                _projector.SetInput("DVD");
-                _amplifier.On();
-                _amplifier.SetVolume(5);
-                _dvdPlayer.On();
-                _dvdPlayer.Play(movie);
-            }
-            public void EndMovie()
-            {
-                Console.WriteLine("\nShutting movie theater down...");
-                _dvdPlayer.Off();
-                _amplifier.Off();
-                _projector.Off();
-                _screen.Up();
-            }
-        }
-        class Program
-        {
-            static void Main(string[] args)
-            {
-                Amplifier amplifier = new Amplifier();
-                Projector projector = new Projector();
-                Screen screen = new Screen();
-                DVDPlayer dvdPlayer = new DVDPlayer();
-                HomeTheaterFacade homeTheater = new HomeTheaterFacade(amplifier, projector, screen, dvdPlayer);
-                homeTheater.WatchMovie("The Matrix");
-                homeTheater.EndMovie();
-            }
+            ICar car3 = carFactory.GetCar("Audi");
+            car3.Display("Black");
+
+            ICar car4 = carFactory.GetCar("BMW");
+            car4.Display("Green");
         }
     }
 }
