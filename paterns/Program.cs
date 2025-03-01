@@ -6,51 +6,36 @@ using System.Threading.Tasks;
 
 namespace paterns
 {
-    public interface ICar
+    public interface IRealSubject
     {
-        void Display(string color);
+        void Request();
     }
-    public class Car : ICar
+    public class RealSubject : IRealSubject
     {
-        private string model;
-        public Car(string model)
+        public void Request()
         {
-            this.model = model;
-        }
-        public void Display(string color)
-        {
-            Console.WriteLine($"Car model: {model}, Color: {color}");
+            Console.WriteLine("RealSubject: Handling request.");
         }
     }
-    public class CarFactory
+    public class Proxy : IRealSubject
     {
-        private Dictionary<string, ICar> cars = new Dictionary<string, ICar>();
-        public ICar GetCar(string model)
+        private RealSubject _realSubject;
+        public void Request()
         {
-            if (!cars.ContainsKey(model))
+            Console.WriteLine("Proxy: Checking access before forwarding the request.");
+            if (_realSubject == null)
             {
-                cars[model] = new Car(model);
-                Console.WriteLine($"Creating car model: {model}");
+                _realSubject = new RealSubject();
             }
-            return cars[model];
+            _realSubject.Request();
         }
     }
     class Program
     {
         static void Main()
         {
-            CarFactory carFactory = new CarFactory();
-            ICar car1 = carFactory.GetCar("BMW");
-            car1.Display("Red");
-
-            ICar car2 = carFactory.GetCar("BMW");
-            car2.Display("Blue");
-
-            ICar car3 = carFactory.GetCar("Audi");
-            car3.Display("Black");
-
-            ICar car4 = carFactory.GetCar("BMW");
-            car4.Display("Green");
+            IRealSubject proxy = new Proxy();
+            proxy.Request();
         }
     }
 }
