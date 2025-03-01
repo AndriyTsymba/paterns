@@ -6,62 +6,114 @@ using System.Threading.Tasks;
 
 namespace paterns
 {
-    public interface ICar
-    {
-        ICar Clone();
-        void ShowDetails();
-    }
+    using System;
 
-    public class Car : ICar
+    namespace SingletonPattern
     {
-        public string Model { get; set; }
-        public string Engine { get; set; }
-        public string Color { get; set; }
-        public Car(string model, string engine, string color)
+        public sealed class Singleton
         {
-            Model = model;
-            Engine = engine;
-            Color = color;
-        }
-        public ICar Clone()
-        {
-            return new Car(Model, Engine, Color);
-        }
-        public void ShowDetails()
-        {
-            Console.WriteLine($"Model: {Model}, Engine: {Engine}, Color: {Color}");
-        }
+            private static Singleton instance;
+            private static readonly object lockObject = new object();
+            public int Count { get; private set; }
+            private Singleton()
+            {
+                Count = 0;
+                Console.WriteLine("Екземпляр Singleton створено");
+            }
+            public static Singleton GetInstance()
+            {
+                if (instance == null)
+                {
+                    lock (lockObject)
+                    {
+                        if (instance == null)
+                        {
+                            instance = new Singleton();
+                        }
+                    }
+                }
 
-    }
-    public class CarFactory
-    {
-        private Dictionary<string, ICar> _carPrototypes = new Dictionary<string, ICar>();
-
-        public void RegisterCar(string key, ICar car)
-        {
-            _carPrototypes[key] = car;
+                return instance;
+            }
+            public void DoSomething()
+            {
+                Count++;
+                Console.WriteLine($"Метод викликано {Count} разів");
+            }
         }
-
-        public ICar CreateCar(string key)
+        public sealed class ModernSingleton
         {
-            return _carPrototypes.ContainsKey(key) ? _carPrototypes[key].Clone() : null;
+            private static readonly ModernSingleton instance = new ModernSingleton();
+            public int Count { get; private set; }
+            static ModernSingleton()
+            {
+            }
+            private ModernSingleton()
+            {
+                Count = 0;
+                Console.WriteLine("Екземпляр ModernSingleton створено");
+            }
+            public static ModernSingleton Instance
+            {
+                get
+                {
+                    return instance;
+                }
+            }
+            public void DoSomething()
+            {
+                Count++;
+                Console.WriteLine($"ModernSingleton: метод викликано {Count} разів");
+            }
         }
-    }
-    class Program
-    {
-        static void Main(string[] args)
+        public sealed class LazySingleton
         {
-            CarFactory factory = new CarFactory();
-            factory.RegisterCar("Sedan", new Car("Sedan", "V6", "Red"));
-            factory.RegisterCar("SUV", new Car("SUV", "V8", "Blue"));
-            ICar sedan = factory.CreateCar("Sedan");
-            ICar suv = factory.CreateCar("SUV");
-            sedan.ShowDetails();
-            suv.ShowDetails();
-            ICar clonedSedan = factory.CreateCar("Sedan");
-            ICar clonedSUV = factory.CreateCar("SUV");
-            clonedSedan.ShowDetails();
-            clonedSUV.ShowDetails();
+            private static readonly Lazy<LazySingleton> lazy =
+                new Lazy<LazySingleton>(() => new LazySingleton());
+            public int Count { get; private set; }
+            private LazySingleton()
+            {
+                Count = 0;
+                Console.WriteLine("Екземпляр LazySingleton створено");
+            }
+            public static LazySingleton Instance
+            {
+                get
+                {
+                    return lazy.Value;
+                }
+            }
+            public void DoSomething()
+            {
+                Count++;
+                Console.WriteLine($"LazySingleton: метод викликано {Count} разів");
+            }
+        }
+        class Program
+        {
+            static void Main(string[] args)
+            {
+                Console.WriteLine("Демонстрація патерну Singleton:");
+                Console.WriteLine("\n1. Класичний Singleton з подвійною перевіркою блокування:");
+                Singleton s1 = Singleton.GetInstance();
+                s1.DoSomething();
+                Singleton s2 = Singleton.GetInstance();
+                s2.DoSomething();
+                Console.WriteLine($"s1 і s2 - це той самий об'єкт: {ReferenceEquals(s1, s2)}");
+                Console.WriteLine("\n2. Сучасна реалізація з властивістю Instance:");
+                ModernSingleton ms1 = ModernSingleton.Instance;
+                ms1.DoSomething();
+                ModernSingleton ms2 = ModernSingleton.Instance;
+                ms2.DoSomething();
+                Console.WriteLine($"ms1 і ms2 - це той самий об'єкт: {ReferenceEquals(ms1, ms2)}");
+                Console.WriteLine("\n3. Реалізація з використанням Lazy<T>:");
+                LazySingleton ls1 = LazySingleton.Instance;
+                ls1.DoSomething();
+                LazySingleton ls2 = LazySingleton.Instance;
+                ls2.DoSomething();
+                Console.WriteLine($"ls1 і ls2 - це той самий об'єкт: {ReferenceEquals(ls1, ls2)}");
+                Console.ReadKey();
+            }
         }
     }
 }
